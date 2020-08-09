@@ -1,6 +1,9 @@
 # TODO --> update the readme
 
-# Azure DevOps Web Sample Extension
+# Versions
+Versions is an extension for Azure Devops to show the versions deployed to each stage of the release pipelines in the way that nuget packages are also displayed
+
+<!-- # Azure DevOps Web Sample Extension
 
 [![Build Status](https://dev.azure.com/ms/azure-devops-extension-sample/_apis/build/status/Microsoft.azure-devops-extension-sample)](https://dev.azure.com/ms/azure-devops-extension-sample/_build/latest?definitionId=14)
 
@@ -134,4 +137,4 @@ provided by the bot. You will only need to do this once across all repos using o
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments. -->
