@@ -59,12 +59,6 @@ export class OverviewTab extends React.Component<{}, IOverviewTabState> {
 
     const route = await navService.getPageRoute();
     this.setState({ route });
-
-    const format = {
-      label: "build",
-      message: "passed",
-      color: "green",
-    };    
   }
 
   public render(): JSX.Element {
