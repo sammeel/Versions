@@ -1,5 +1,7 @@
 import * as React from "react";
 import * as SDK from "azure-devops-extension-sdk";
+import { getClient } from "azure-devops-extension-api";
+import { ReleaseRestClient, Release } from "azure-devops-extension-api/Release";
 import {
   CommonServiceIds,
   IProjectPageService,
@@ -7,6 +9,10 @@ import {
   INavigationElement,
   IPageRoute,
 } from "azure-devops-extension-api";
+import {
+  CoreRestClient,
+  TeamProjectReference,
+} from "azure-devops-extension-api/Core";
 
 export interface IOverviewTabState {
   userName?: string;
@@ -17,7 +23,8 @@ export interface IOverviewTabState {
   host?: SDK.IHostContext;
   navElements?: INavigationElement[];
   route?: IPageRoute;
-  svg?: string;
+  releases?: Release[];
+  projects?: TeamProjectReference[];
 }
 
 export class OverviewTab extends React.Component<{}, IOverviewTabState> {
@@ -47,6 +54,7 @@ export class OverviewTab extends React.Component<{}, IOverviewTabState> {
       CommonServiceIds.ProjectPageService
     );
     const project = await projectService.getProject();
+    console.log("project", project);
     if (project) {
       this.setState({ projectName: project.name });
     }
@@ -59,6 +67,17 @@ export class OverviewTab extends React.Component<{}, IOverviewTabState> {
 
     const route = await navService.getPageRoute();
     this.setState({ route });
+
+    const projects = await getClient(CoreRestClient).getProjects();
+    this.setState({ projects: projects });
+
+    if (project) {
+      const releases = await getClient(ReleaseRestClient).getReleases(
+        project.id
+      );
+      this.setState({ releases: releases });
+      console.log("releases", releases);
+    }
   }
 
   public render(): JSX.Element {
@@ -70,25 +89,44 @@ export class OverviewTab extends React.Component<{}, IOverviewTabState> {
       extensionContext,
       route,
       navElements,
-      svg,
+      releases,
+      projects,
     } = this.state;
 
     return (
       <div className="page-content page-content-top flex-column rhythm-vertical-16">
         <div>
           test badge:
-              <img alt="Custom badge" src="https://img.shields.io/static/v1?label=myLabel&message=myMessage&color=blue"></img>
+          <img
+            alt="Custom badge"
+            src="https://img.shields.io/static/v1?label=myLabel&message=myMessage&color=blue"
+          ></img>
         </div>
+
+        <div>test releases</div>
+        {releases &&
+          releases.map((release) => {
+            return <div key={release.id}>{release.name}</div>;
+          })}
+
+        <div>test projects</div>
+        {projects &&
+          projects.map((project) => {
+            return <div key={project.id}> -- {project.name}</div>;
+          })}
+        <hr />
 
         <div>Hello, {userName}!</div>
         {projectName && <div>Project: {projectName}</div>}
         <div>iframe URL: {iframeUrl}</div>
+
         {extensionContext && (
           <div>
             <div>Extension id: {extensionContext.id}</div>
             <div>Extension version: {extensionContext.version}</div>
           </div>
         )}
+
         {host && (
           <div>
             <div>Host id: {host.id}</div>
