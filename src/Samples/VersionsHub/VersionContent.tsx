@@ -39,7 +39,7 @@ export interface IReleaseInformationEnvironment {
   color: string;
 }
 
-export class OverviewTab extends React.Component<{}, IOverviewTabState> {
+export class VersionsContent extends React.Component<{}, IOverviewTabState> {
   constructor(props: {}) {
     super(props);
 
@@ -65,7 +65,7 @@ export class OverviewTab extends React.Component<{}, IOverviewTabState> {
 
     const projectService = await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService);
     const project = await projectService.getProject();
-    console.log("project", project);
+    
     if (project) {
       this.setState({ projectName: project.name });
     }
@@ -165,49 +165,23 @@ export class OverviewTab extends React.Component<{}, IOverviewTabState> {
   }
 
   public render(): JSX.Element {
-    const {
-      userName,
-      projectName,
-      host,
-      iframeUrl,
-      extensionContext,
-      route,
-      navElements,
-      releaseDefinitions: releaseDefinitions,
-      releases,
-      releaseInformations,
-    } = this.state;
-
-    const containerStyle = { height: "300px", width: "800px", display: "flex" };
-
-    var imgStyle: React.CSSProperties = {
-      marginRight: "15px",
-    };
+    const { releaseInformations } = this.state;
 
     return (
       <div className="page-content page-content-top flex-column rhythm-vertical-16">
-        <div>
-          test badge:
-          <img alt="Custom badge" src="https://img.shields.io/static/v1?label=myLabel&message=myMessage&color=blue"></img>
-        </div>
-        <div>test releases</div>
-        a: {releaseInformations == null}
         {releaseInformations &&
           releaseInformations.map((information) => {
             return (
               <div key={information.releaseDefinition.id}>
-                <h1>Release Definition: {information.releaseDefinition.name}</h1>
+                <h1>{information.releaseDefinition.name}</h1>
                 <div className="badges">
                   {information.environments.map((environment, index) => {
                     return (
                       <img
-                        style={imgStyle}
                         key={index}
+                        className="margin-right-16"
                         alt="Custom badge"
                         src={`https://img.shields.io/static/v1?label=${environment.name}&message=${environment.deployedReleaseName}&color=${environment.color}`}
-                        // src={`https://img.shields.io/static/v1?label=${environment.name}&message=${
-                        //   environment.deployedRelease?.name ?? "not deployed"
-                        // }&color=${environment.color}`}
                       />
                     );
                   })}
@@ -215,28 +189,6 @@ export class OverviewTab extends React.Component<{}, IOverviewTabState> {
               </div>
             );
           })}
-        {/* {releaseDefinitions &&
-          releaseDefinitions.map((definition) => {
-            return <div key={definition.id}>{definition.name}</div>;
-          })} */}
-        <div>Hello, {userName}!</div>
-        {projectName && <div>Project: {projectName}</div>}
-        <div>iframe URL: {iframeUrl}</div>
-        {extensionContext && (
-          <div>
-            <div>Extension id: {extensionContext.id}</div>
-            <div>Extension version: {extensionContext.version}</div>
-          </div>
-        )}
-        {host && (
-          <div>
-            <div>Host id: {host.id}</div>
-            <div>Host name: {host.name}</div>
-            <div>Host service version: {host.serviceVersion}</div>
-          </div>
-        )}
-        {navElements && <div>Nav elements: {JSON.stringify(navElements)}</div>}
-        {route && <div>Route: {JSON.stringify(route)}</div>}
       </div>
     );
   }

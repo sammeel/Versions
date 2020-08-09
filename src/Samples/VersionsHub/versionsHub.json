@@ -1,7 +1,7 @@
 {
   "contributions": [
     {
-      "id": "hub",
+      "id": "versionsHub",
       "type": "ms.vss-web.hub",
       "targets": ["ms.vss-build-web.build-release-hub-group"],
       "includes": [
@@ -11,8 +11,8 @@
         "ms.vss-features.host-dialog-service"
       ],
       "properties": {
-        "name": "Sample hub",
-        "uri": "dist/Hub/Hub.html",
+        "name": "Versions",
+        "uri": "dist/VersionsHub/VersionsHub.html",
         "icon": "asset://static/sample-icon.png",
         "supportsMobile": true
       }
