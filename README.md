@@ -1,5 +1,3 @@
-# TODO --> update the readme
-
 # Versions
 Versions is an extension for Azure Devops to show the versions deployed to each stage of the release pipelines in the way that nuget packages are also displayed
 
