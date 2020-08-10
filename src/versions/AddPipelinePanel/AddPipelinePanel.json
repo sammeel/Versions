@@ -1,0 +1,11 @@
+{
+    "contributions": [
+        {
+            "id": "add-pipeline-panel-content",
+            "type": "ms.vss-web.external-content",
+            "properties": {
+                "uri": "dist/AddPipelinePanel/AddPipelinePanel.html"
+            }
+        }
+    ]
+}

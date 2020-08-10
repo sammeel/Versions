@@ -12,7 +12,7 @@
       ],
       "properties": {
         "name": "Versions",
-        "uri": "dist/VersionsHub/VersionsHub.html",
+        "uri": "dist/VersionsHub/versionsHub.html",
         "icon": "asset://static/sample-icon.png",
         "supportsMobile": true
       }

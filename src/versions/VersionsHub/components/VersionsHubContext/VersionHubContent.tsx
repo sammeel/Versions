@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as SDK from "azure-devops-extension-sdk";
-import { getClient } from "azure-devops-extension-api";
+import { getClient, IExtensionDataService, IExtensionDataManager } from "azure-devops-extension-api";
 import {
   ReleaseRestClient,
   Release,
@@ -39,7 +39,8 @@ export interface IReleaseInformationEnvironment {
   color: string;
 }
 
-export class VersionsContent extends React.Component<{}, IOverviewTabState> {
+export class VersionsHubContent extends React.Component<{}, IOverviewTabState> {
+
   constructor(props: {}) {
     super(props);
 
