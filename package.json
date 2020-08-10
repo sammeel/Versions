@@ -20,8 +20,8 @@
     "build:dev": "npm run compile:dev && npm run postbuild",
     "postbuild": "npm run package-extension -- --rev-version",
     "package-extension": "tfx extension create --manifest-globs azure-devops-extension.json src/Samples/**/*.json",
-    "publish-extension": "tfx extension publish --manifest-globs azure-devops-extension.json src/Samples/**/*.json --rev-version --overrides-file configs/release.json --token 4phdrvzsk77hcjzfgapommlsvu222lqv7m2wtbdwycwfjbur6fha",
-    "publish-extension-dev": "tfx extension publish --manifest-globs azure-devops-extension.json src/Samples/**/*.json --rev-version --overrides-file configs/dev.json --token 4phdrvzsk77hcjzfgapommlsvu222lqv7m2wtbdwycwfjbur6fha",
+    "publish-extension": "tfx extension publish --manifest-globs azure-devops-extension.json src/Samples/**/*.json --overrides-file configs/release.json --token 4phdrvzsk77hcjzfgapommlsvu222lqv7m2wtbdwycwfjbur6fha",
+    "publish-extension-dev": "tfx extension publish --manifest-globs azure-devops-extension.json src/Samples/**/*.json --overrides-file configs/dev.json --token 4phdrvzsk77hcjzfgapommlsvu222lqv7m2wtbdwycwfjbur6fha",
     "dev-server": "webpack-dev-server --mode development"
   },
   "dependencies": {
