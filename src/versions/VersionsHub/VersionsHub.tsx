@@ -10,11 +10,13 @@ import { Page } from "azure-devops-ui/Page";
 
 import { VersionsHubContent } from "./components/VersionsHubContext/VersionHubContent"; 
 import { showRootComponent } from "../../Common";
+import { ReleaseDefinition } from "azure-devops-extension-api/Release";
 
 interface IVersionsContentState {
     fullScreenMode: boolean;
     headerDescription?: string;
     useLargeTitle?: boolean;
+    addedValue?: string;
 }
 
 class VersionsHub extends React.Component<{}, IVersionsContentState> {
@@ -23,7 +25,7 @@ class VersionsHub extends React.Component<{}, IVersionsContentState> {
         super(props);
 
         this.state = {
-            fullScreenMode: false
+            fullScreenMode: false,
         };
     }
 
@@ -33,7 +35,7 @@ class VersionsHub extends React.Component<{}, IVersionsContentState> {
 
     public render(): JSX.Element {
 
-        const { headerDescription, useLargeTitle } = this.state;
+        const { headerDescription, useLargeTitle, addedValue } = this.state;
 
         return (
             <Page className="sample-hub flex-grow">
@@ -44,6 +46,9 @@ class VersionsHub extends React.Component<{}, IVersionsContentState> {
                     titleSize={useLargeTitle ? TitleSize.Large : TitleSize.Medium} />
 
                 <VersionsHubContent />
+
+                {addedValue}
+
             </Page>
         );
     }
@@ -67,7 +72,7 @@ class VersionsHub extends React.Component<{}, IVersionsContentState> {
 
     private async onPanelClick(): Promise<void> {
         const panelService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
-        panelService.openPanel<boolean | undefined>(SDK.getExtensionContext().id + ".add-pipeline-panel-content", {
+        panelService.openPanel<ReleaseDefinition | undefined>(SDK.getExtensionContext().id + ".add-pipeline-panel-content", {
             title: "Add pipeline",
             description: "Add a pipeline to the view",
             // configuration: {
@@ -76,7 +81,7 @@ class VersionsHub extends React.Component<{}, IVersionsContentState> {
             // },
             onClose: (result) => {
                 if (result !== undefined) {
-                    this.setState({ headerDescription: result ? "This is a header description" : undefined });
+                    this.setState({ addedValue: result ? result.name : undefined });
                 }
             }
         });
