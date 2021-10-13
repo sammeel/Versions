@@ -8,84 +8,90 @@ import { Header, TitleSize } from "azure-devops-ui/Header";
 import { IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { Page } from "azure-devops-ui/Page";
 
-import { VersionsHubContent } from "./components/VersionsHubContext/VersionHubContent"; 
+import { VersionsHubContent } from "./components/VersionsHubContent/VersionHubContent";
 import { showRootComponent } from "../../Common";
 import { ReleaseDefinition } from "azure-devops-extension-api/Release";
 
+import store from './store';
+
+import {Provider} from 'react-redux';
+
 interface IVersionsContentState {
-    fullScreenMode: boolean;
-    headerDescription?: string;
-    useLargeTitle?: boolean;
-    addedValue?: string;
+  fullScreenMode: boolean;
+  headerDescription?: string;
+  useLargeTitle?: boolean;
+  addedValue?: string;
 }
 
 class VersionsHub extends React.Component<{}, IVersionsContentState> {
+  constructor(props: {}) {
+    super(props);
 
-    constructor(props: {}) {
-        super(props);
+    this.state = {
+      fullScreenMode: false,
+    };
+  }
 
-        this.state = {
-            fullScreenMode: false,
-        };
-    }
+  public componentDidMount() {
+    SDK.init();
+  }
 
-    public componentDidMount() {
-        SDK.init();
-    }
+  public render(): JSX.Element {
+    const { headerDescription, useLargeTitle, addedValue } = this.state;
 
-    public render(): JSX.Element {
+    return (
+      <Provider store={store}>
+        <Page className="sample-hub flex-grow">
+          <Header
+            title="Versions"
+            description={headerDescription}
+            commandBarItems={this.getCommandBarItems()}
+            titleSize={useLargeTitle ? TitleSize.Large : TitleSize.Medium}
+          />
 
-        const { headerDescription, useLargeTitle, addedValue } = this.state;
+          <VersionsHubContent />
 
-        return (
-            <Page className="sample-hub flex-grow">
+          {addedValue}
+        </Page>
+      </Provider>
+    );
+  }
 
-                <Header title="Versions"
-                    description={headerDescription}
-                    commandBarItems={this.getCommandBarItems()}
-                    titleSize={useLargeTitle ? TitleSize.Large : TitleSize.Medium} />
+  private getCommandBarItems(): IHeaderCommandBarItem[] {
+    return [
+      {
+        id: "panel",
+        text: "Add pipeline",
+        onActivate: () => {
+          this.onPanelClick();
+        },
+        iconProps: {
+          iconName: "Add pipeline",
+        },
+        isPrimary: true,
+        tooltipProps: {
+          text: "Add a new pipeline to the view",
+        },
+      },
+    ];
+  }
 
-                <VersionsHubContent />
-
-                {addedValue}
-
-            </Page>
-        );
-    }
-
-    private getCommandBarItems(): IHeaderCommandBarItem[] {
-        return [
-            {
-              id: "panel",
-              text: "Add pipeline",
-              onActivate: () => { this.onPanelClick() },
-              iconProps: {
-                iconName: 'Add pipeline'
-              },
-              isPrimary: true,
-              tooltipProps: {
-                text: "Add a new pipeline to the view"
-              }
-            },
-        ];
-    }
-
-    private async onPanelClick(): Promise<void> {
-        const panelService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
-        panelService.openPanel<ReleaseDefinition | undefined>(SDK.getExtensionContext().id + ".add-pipeline-panel-content", {
-            title: "Add pipeline",
-            description: "Add a pipeline to the view",
-            // configuration: {
-            //     message: "Show header description?",
-            //     initialValue: !!this.state.headerDescription
-            // },
-            onClose: (result) => {
-                if (result !== undefined) {
-                    this.setState({ addedValue: result ? result.name : undefined });
-                }
-            }
-        });
-    }
+  private async onPanelClick(): Promise<void> {
+    const panelService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
+    panelService.openPanel<ReleaseDefinition | undefined>(SDK.getExtensionContext().id + ".add-pipeline-panel-content", {
+      title: "Add pipeline",
+      description: "Add a pipeline to the view",
+      // configuration: {
+      //     message: "Show header description?",
+      //     initialValue: !!this.state.headerDescription
+      // },
+      onClose: (result) => {
+        if (result !== undefined) {
+          this.setState({ addedValue: result ? result.name : undefined });
+        }
+      },
+    });
+  }
 }
 
 showRootComponent(<VersionsHub />);

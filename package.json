@@ -20,33 +20,68 @@
     "build:dev": "npm run compile:dev && npm run postbuild",
     "postbuild": "npm run package-extension -- --rev-version",
     "package-extension": "tfx extension create --manifest-globs azure-devops-extension.json src/versions/**/*.json",
-    "publish-extension": "tfx extension publish --manifest-globs azure-devops-extension.json src/versions/**/*.json --overrides-file configs/release.json --token 4phdrvzsk77hcjzfgapommlsvu222lqv7m2wtbdwycwfjbur6fha",
-    "publish-extension:dev": "tfx extension publish --manifest-globs azure-devops-extension.json src/versions/**/*.json --overrides-file configs/dev.json --token 4phdrvzsk77hcjzfgapommlsvu222lqv7m2wtbdwycwfjbur6fha",
-    "dev-server": "webpack-dev-server --mode development"
+    "publish-extension": "tfx extension publish --manifest-globs azure-devops-extension.json src/versions/**/*.json --overrides-file configs/release.json",
+    "publish-extension:dev": "tfx extension publish --manifest-globs azure-devops-extension.json src/versions/**/*.json --overrides-file configs/dev.json --verbose",
+    "dev-server": "webpack-dev-server --mode development",
+    "test": "env TEST_REPORT_FILENAME=test-results.xml jest --verbose"
   },
   "dependencies": {
-    "azure-devops-extension-api": "~1.157.0",
+    "@reduxjs/toolkit": "^1.6.2",
+    "@types/react-redux": "^7.1.19",
+    "azure-devops-extension-api": "~1.158.0",
     "azure-devops-extension-sdk": "~2.0.11",
-    "azure-devops-ui": "~2.164.0",
-    "react": "~16.8.1",
-    "react-dom": "~16.8.1"
+    "azure-devops-ui": "~2.167.17",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.5"
   },
   "devDependencies": {
-    "@types/react": "~16.8.2",
-    "@types/react-dom": "~16.8.0",
-    "base64-inline-loader": "^1.1.1",
-    "copy-webpack-plugin": "^4.5.4",
-    "css-loader": "~1.0.0",
-    "file-loader": "~2.0.0",
-    "node-sass": "~4.12.0",
-    "rimraf": "~2.6.2",
-    "sass-loader": "~7.1.0",
-    "style-loader": "~0.23.1",
-    "tfx-cli": "^0.6.3",
-    "ts-loader": "~5.2.2",
-    "typescript": "^2.9.2",
-    "webpack": "^4.22.0",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.11.0"
+    "@testing-library/jest-dom": "^5.11.0",
+    "@testing-library/react": "^10.4.4",
+    "@types/jest": "^26.0.3",
+    "@types/react": "~17.0.29",
+    "@types/react-dom": "~17.0.9",
+    "base64-inline-loader": "^2.0.1",
+    "copy-webpack-plugin": "^9.0.1",
+    "css-loader": "~6.4.0",
+    "file-loader": "~6.2.0",
+    "jest": "^26.1.0",
+    "jest-junit-reporter": "^1.1.0",
+    "node-sass": "~6.0.1",
+    "rimraf": "~3.0.2",
+    "sass-loader": "~12.2.0",
+    "style-loader": "~3.3.0",
+    "tfx-cli": "^0.9.3",
+    "ts-jest": "^26.1.1",
+    "ts-loader": "~9.2.6",
+    "typescript": "^4.4.4",
+    "webpack": "^5.58.1",
+    "webpack-cli": "^4.9.0",
+    "webpack-dev-server": "^4.3.1"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.(js|ts|tsx|jsx)$": "ts-jest"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(react-native|azure-devops-ui|azure-devops-extension-sdk)/)"
+    ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/__mocks__/fileMock.js",
+      "\\.(css|less|scss)$": "<rootDir>/src/__mocks__/styleMock.js"
+    },
+    "preset": "ts-jest/presets/js-with-babel",
+    "testResultsProcessor": "./node_modules/jest-junit-reporter",
+    "collectCoverage": true,
+    "coverageReporters": [
+      "json",
+      "html",
+      "cobertura"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.test.json"
+      }
+    }
   }
 }

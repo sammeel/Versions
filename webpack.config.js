@@ -9,8 +9,7 @@ const entries = {};
 const samplesDir = path.join(__dirname, "src/versions");
 fs.readdirSync(samplesDir).filter((dir) => {
   if (fs.statSync(path.join(samplesDir, dir)).isDirectory()) {
-    entries[dir] =
-      "./" + path.relative(process.cwd(), path.join(samplesDir, dir, dir));
+    entries[dir] = "./" + path.relative(process.cwd(), path.join(samplesDir, dir, dir));
   }
 });
 
@@ -30,9 +29,7 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
     alias: {
-      "azure-devops-extension-sdk": path.resolve(
-        "node_modules/azure-devops-extension-sdk"
-      ),
+      "azure-devops-extension-sdk": path.resolve("node_modules/azure-devops-extension-sdk"),
     },
   },
   stats: {
@@ -46,12 +43,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        use: [
-          "style-loader",
-          "css-loader",
-          "azure-devops-ui/buildScripts/css-variables-loader",
-          "sass-loader",
-        ],
+        use: ["style-loader", "css-loader", "azure-devops-ui/buildScripts/css-variables-loader", "sass-loader"],
       },
       {
         test: /\.css$/,
@@ -72,6 +64,8 @@ module.exports = {
     ],
   },
   plugins: [
-    new CopyWebpackPlugin([{ from: "**/*.html", context: "src/versions" }]),
+    new CopyWebpackPlugin({
+      patterns: [{ from: "**/*.html", context: "src/versions" }],
+    }),
   ],
 };
