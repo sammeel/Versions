@@ -5,6 +5,12 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug File",
+      "program": "${file}"
+    },
+    {
       "name": "Attach to Edge (untested)",
       "port": 9222,
       "request": "attach",
@@ -14,7 +20,6 @@
         "webpack:///": "${workspaceFolder}/"
       }
     },
-    
     {
       "name": "Launch Edge",
       "request": "launch",
@@ -33,6 +38,10 @@
       "reAttach": true,
       "firefoxExecutable": "D:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe",
       "pathMappings": [
+        {
+          "url": "webpack://versions/src",
+          "path": "${workspaceFolder}/src"
+        },
         {
           "url": "webpack:///",
           "path": "${workspaceFolder}/"

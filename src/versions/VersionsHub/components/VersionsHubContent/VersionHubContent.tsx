@@ -11,20 +11,28 @@ import {
 } from "azure-devops-extension-api/Release";
 import { CommonServiceIds, IProjectPageService, IHostNavigationService, INavigationElement, IPageRoute } from "azure-devops-extension-api";
 import { CoreRestClient, TeamProjectReference } from "azure-devops-extension-api/Core";
+import { store } from "../../../Common/store";
+import { useAppDispatch } from "../../../Common/store/hooks";
+import { incrementAsync } from "../../../Common/store/slices/counterReducer";
+import { useEffect, useState } from "react";
+
+export interface IGeneralInfoState {
+  username?: string;
+  extensionContext?: SDK.IExtensionContext;
+  host?: SDK.IHostContext;
+}
 
 export interface IOverviewTabState {
-  userName?: string;
   projectName?: string;
   iframeUrl?: string;
   extensionData?: string;
-  extensionContext?: SDK.IExtensionContext;
-  host?: SDK.IHostContext;
   navElements?: INavigationElement[];
   route?: IPageRoute;
   releaseDefinitions?: ReleaseDefinition[];
   projects?: TeamProjectReference[];
   releases: { [prop: string]: Release };
   releaseInformations?: IReleaseInformation[];
+  pipelines: string[];
 }
 
 export interface IReleaseInformation {
@@ -39,139 +47,151 @@ export interface IReleaseInformationEnvironment {
   color: string;
 }
 
-export class VersionsHubContent extends React.Component<{}, IOverviewTabState> {
+const getUsername = async (): Promise<IGeneralInfoState> => {
+  await SDK.ready();
 
-  constructor(props: {}) {
-    super(props);
+  const username = SDK.getUser().displayName;
+  return {
+    username: username,
+    extensionContext: SDK.getExtensionContext(),
+    host: SDK.getHost(),
+  };
+};
 
-    this.state = {
-      iframeUrl: window.location.href,
-      releases: {},
-    };
+const getState = async (): Promise<IOverviewTabState> => {
+  await SDK.ready();
+
+  const projectService = await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService);
+  const project = await projectService.getProject();
+
+  const resultState: IOverviewTabState = { releases: {}, pipelines: [] };
+
+  if (project) {
+    resultState.projectName = project.name;
   }
 
-  public componentDidMount() {
-    this.initializeState();
-  }
+  const navService = await SDK.getService<IHostNavigationService>(CommonServiceIds.HostNavigationService);
+  const navElements = await navService.getPageNavigationElements();
+  resultState.navElements = navElements;
 
-  private async initializeState(): Promise<void> {
-    await SDK.ready();
+  const route = await navService.getPageRoute();
+  resultState.route = route;
 
-    const userName = SDK.getUser().displayName;
-    this.setState({
-      userName,
-      extensionContext: SDK.getExtensionContext(),
-      host: SDK.getHost(),
+  const projects = await getClient(CoreRestClient).getProjects();
+  resultState.projects = projects;
+
+  if (project) {
+    const expands = ReleaseDefinitionExpands.Environments;
+
+    const releaseClient = getClient(ReleaseRestClient);
+
+    const releaseDefinitions = await releaseClient.getReleaseDefinitions(project.id, undefined, expands);
+    resultState.releaseDefinitions = releaseDefinitions;
+
+    let releasesToFetch: number[] = [];
+
+    releaseDefinitions.forEach((releaseDefinition) => {
+      releaseDefinition.environments.forEach((environment) => {
+        if (environment.currentRelease.id > 0) {
+          if (releasesToFetch) releasesToFetch.push(environment.currentRelease.id);
+        }
+      });
     });
 
-    const projectService = await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService);
-    const project = await projectService.getProject();
-    
-    if (project) {
-      this.setState({ projectName: project.name });
-    }
+    const distinct = (value: any, index: number, self: any) => {
+      return self.indexOf(value) === index;
+    };
 
-    const navService = await SDK.getService<IHostNavigationService>(CommonServiceIds.HostNavigationService);
-    const navElements = await navService.getPageNavigationElements();
-    this.setState({ navElements });
+    releasesToFetch = releasesToFetch.filter(distinct);
 
-    const route = await navService.getPageRoute();
-    this.setState({ route });
+    const promises = releasesToFetch.map((value) => releaseClient.getRelease(project.id, value));
+    const result = await Promise.all(promises);
 
-    const projects = await getClient(CoreRestClient).getProjects();
-    this.setState({ projects: projects });
+    const releases: { [prop: string]: Release } = {};
 
-    if (project) {
-      const expands = ReleaseDefinitionExpands.Environments;
+    result.forEach((result) => {
+      releases[result.id] = result;
+    });
 
-      const releaseClient = getClient(ReleaseRestClient);
+    resultState.releases = releases;
 
-      const releaseDefinitions = await releaseClient.getReleaseDefinitions(project.id, undefined, expands);
-      this.setState({ releaseDefinitions: releaseDefinitions });
+    const releaseInformations: IReleaseInformation[] = [];
 
-      let releasesToFetch: number[] = [];
+    releaseDefinitions.forEach((releaseDefinition) => {
+      const releaseInformationEnvironments: IReleaseInformationEnvironment[] = [];
+      releaseDefinition.environments.forEach((environment) => {
+        let color = "blue";
+        let releaseName = "Not Deployed";
 
-      releaseDefinitions.forEach((releaseDefinition) => {
-        releaseDefinition.environments.forEach((environment) => {
-          if (environment.currentRelease.id > 0) {
-            if (releasesToFetch) releasesToFetch.push(environment.currentRelease.id);
-          }
-        });
-      });
+        const release = releases[environment.currentRelease.id];
+        let releaseEnvironment: ReleaseEnvironment | undefined;
 
-      const distinct = (value: any, index: number, self: any) => {
-        return self.indexOf(value) === index;
-      };
-
-      releasesToFetch = releasesToFetch.filter(distinct);
-
-      const promises = releasesToFetch.map((value) => releaseClient.getRelease(project.id, value));
-      const result = await Promise.all(promises);
-
-      const releases: { [prop: string]: Release } = {};
-
-      result.forEach((result) => {
-        releases[result.id] = result;
-      });
-
-      this.setState({ releases: releases });
-
-      const releaseInformations: IReleaseInformation[] = [];
-
-      releaseDefinitions.forEach((releaseDefinition) => {
-        const releaseInformationEnvironments: IReleaseInformationEnvironment[] = [];
-        releaseDefinition.environments.forEach((environment) => {
-          let color = "blue";
-          let releaseName = "Not Deployed";
-
-          const release = releases[environment.currentRelease.id];
-          let releaseEnvironment: ReleaseEnvironment | undefined;
-
-          if (release === undefined) {
-            color = "gray";
-          } else {
-            releaseEnvironment = release.environments.find((env) => env.definitionEnvironmentId === environment.id);
-            if (releaseEnvironment) {
-              releaseName = release.name;
-              switch (releaseEnvironment.status) {
-                case EnvironmentStatus.Succeeded:
-                  color = "green";
-                  break;
-                case EnvironmentStatus.Canceled:
-                case EnvironmentStatus.Rejected:
-                  color = "red";
-                  break;
-              }
-            } else {
-              color = "gray";
+        if (release === undefined) {
+          color = "gray";
+        } else {
+          releaseEnvironment = release.environments.find((env) => env.definitionEnvironmentId === environment.id);
+          if (releaseEnvironment) {
+            releaseName = release.name;
+            switch (releaseEnvironment.status) {
+              case EnvironmentStatus.Succeeded:
+                color = "green";
+                break;
+              case EnvironmentStatus.Canceled:
+              case EnvironmentStatus.Rejected:
+                color = "red";
+                break;
             }
+          } else {
+            color = "gray";
           }
+        }
 
-          releaseInformationEnvironments.push({
-            name: environment.name,
-            deployedRelease: releaseEnvironment,
-            color: color,
-            deployedReleaseName: releaseName,
-          });
-        });
-
-        releaseInformations.push({
-          releaseDefinition: releaseDefinition,
-          environments: releaseInformationEnvironments,
+        releaseInformationEnvironments.push({
+          name: environment.name,
+          deployedRelease: releaseEnvironment,
+          color: color,
+          deployedReleaseName: releaseName,
         });
       });
 
-      this.setState({ releaseInformations: releaseInformations });
-    }
+      releaseInformations.push({
+        releaseDefinition: releaseDefinition,
+        environments: releaseInformationEnvironments,
+      });
+    });
+
+    resultState.releaseInformations = releaseInformations;
   }
 
-  public render(): JSX.Element {
-    const { releaseInformations } = this.state;
+  return resultState;
+};
 
-    return (
+export function VersionsHubContent(props: any) {
+  const [state, setState] = useState<IOverviewTabState>();
+  const [generalState, setGeneralState] = useState<IGeneralInfoState>();
+
+  useEffect(() => {
+    const getDataWrapper = async () => {
+      const response = await getUsername();
+      setGeneralState(response);
+    };
+    getDataWrapper();
+  }, []);
+
+  useEffect(() => {
+    const getDataWrapper = async () => {
+      const response = await getState();
+      setState(response);
+    };
+    getDataWrapper();
+  }, []);
+
+  return (
+    <div className="page-content page-content-top flex-column rhythm-vertical-16">
+      <div>{generalState?.username}</div>
       <div className="page-content page-content-top flex-column rhythm-vertical-16">
-        {releaseInformations &&
-          releaseInformations.map((information) => {
+        {state?.releaseInformations &&
+          state?.releaseInformations.map((information) => {
             return (
               <div key={information.releaseDefinition.id}>
                 <h1>{information.releaseDefinition.name}</h1>
@@ -191,6 +211,6 @@ export class VersionsHubContent extends React.Component<{}, IOverviewTabState> {
             );
           })}
       </div>
-    );
-  }
+    </div>
+  );
 }

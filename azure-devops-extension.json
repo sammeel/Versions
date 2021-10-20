@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "versions",
     "publisher": "SamMeel",
-    "version": "1.0.46",
+    "version": "1.0.47",
     "name": "Versions",
     "public": false,
     "description": "Azure DevOps Extension",

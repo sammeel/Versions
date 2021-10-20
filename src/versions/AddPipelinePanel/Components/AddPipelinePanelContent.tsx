@@ -1,22 +1,15 @@
-import "./AddPipelinePanel.scss";
-
 import * as React from "react";
 import * as SDK from "azure-devops-extension-sdk";
 
 import { Dropdown } from "azure-devops-ui/Dropdown";
 import { Button } from "azure-devops-ui/Button";
 import { ButtonGroup } from "azure-devops-ui/ButtonGroup";
-import { Toggle } from "azure-devops-ui/Toggle";
-import { showRootComponent } from "../../Common";
 import { getClient, IProjectPageService, CommonServiceIds } from "azure-devops-extension-api";
 import { ReleaseRestClient, ReleaseDefinition, Release } from "azure-devops-extension-api/Release";
 import { IListBoxItem } from "azure-devops-ui/ListBox";
-import { useAppDispatch } from "../Common/store/hooks";
-import { addPipeline } from "../Common/store/slices/versionsReducer";
 import { useEffect, useState } from "react";
-import { Provider } from "react-redux";
-import { store } from "../Common/store";
-import { AddPipelinePanelContent } from "./Components/AddPipelinePanelContent";
+import { addPipeline } from "../../Common/store/slices/versionsReducer";
+import { useAppDispatch } from "../../Common/store/hooks";
 
 const getReleaseDefinitions = async (): Promise<IListBoxItem<ReleaseDefinition>[] | null> => {
   SDK.init();
@@ -36,10 +29,10 @@ const getReleaseDefinitions = async (): Promise<IListBoxItem<ReleaseDefinition>[
   return null;
 };
 
-export const AddPipelinePanel = () => {
+export const AddPipelinePanelContent = () => {
   const [releaseDefinitions, setReleaseDefinitions] = useState<IListBoxItem<ReleaseDefinition>[]>([]);
   const [selectedReleaseDefinition, setSelectedReleaseDefinition] = useState<ReleaseDefinition | undefined>(undefined);
-  // const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const getDataWrapper = async () => {
@@ -60,9 +53,9 @@ export const AddPipelinePanel = () => {
 
   const okClicked = () => {
     dismiss(true);
-    // if (selectedReleaseDefinition?.name) {
-    //   dispatch(addPipeline(selectedReleaseDefinition?.name));
-    // }
+    if (selectedReleaseDefinition?.name) {
+      dispatch(addPipeline(selectedReleaseDefinition?.name));
+    }
   };
 
   const dismiss = (useValue: boolean) => {
@@ -76,13 +69,17 @@ export const AddPipelinePanel = () => {
   };
 
   return (
-    <Provider store={store}>
-      <AddPipelinePanelContent />
-    </Provider>
+    <div className="sample-panel flex-column flex-grow">
+      <Dropdown items={releaseDefinitions} placeholder="Select a release pipeline" onSelect={onSelect}></Dropdown>
+      <ButtonGroup className="sample-panel-button-bar">
+        <Button primary={true} text="OK" onClick={() => okClicked()} />
+        <Button text="Cancel" onClick={() => dismiss(false)} />
+      </ButtonGroup>
+
+      {selectedReleaseDefinition?.name}
+    </div>
   );
 };
-
-showRootComponent(<AddPipelinePanel />);
 
 // interface IPanelContentState {
 //   message?: string;

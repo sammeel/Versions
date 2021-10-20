@@ -8,7 +8,7 @@ const entries = {};
 // Loop through subfolders in the "Samples" folder and add an entry for each one
 const samplesDir = path.join(__dirname, "src/versions");
 fs.readdirSync(samplesDir).filter((dir) => {
-  if (fs.statSync(path.join(samplesDir, dir)).isDirectory()) {
+  if (dir !== "Common" && fs.statSync(path.join(samplesDir, dir)).isDirectory()) {
     entries[dir] = "./" + path.relative(process.cwd(), path.join(samplesDir, dir, dir));
   }
 });
