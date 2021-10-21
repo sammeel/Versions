@@ -10,7 +10,7 @@ interface versionsState {
   addedValue?: string;
 }
 
-export const addPipeline = createAsyncThunk("versions/addPipeline", async (pipeline: string, thunkAPI) => {
+export const addPipeline = createAsyncThunk("versions/addPipeline", async (newPipeline: string, thunkAPI) => {
   const accessToken = await SDK.getAccessToken();
   const extensionDataService = await SDK.getService<IExtensionDataService>(CommonServiceIds.ExtensionDataService);
 
@@ -27,7 +27,9 @@ export const addPipeline = createAsyncThunk("versions/addPipeline", async (pipel
     pipelines = [];
   }
 
-  pipelines.push(pipeline);
+  pipelines.push(newPipeline);
+
+  pipelines = [...new Set([...pipelines, newPipeline])]
 
   await manager.setValue<string[]>("pipelines", pipelines);
 

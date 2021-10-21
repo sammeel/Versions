@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as SDK from "azure-devops-extension-sdk";
-import { getClient, IExtensionDataService, IExtensionDataManager } from "azure-devops-extension-api";
+import { getClient } from "azure-devops-extension-api";
 import {
   ReleaseRestClient,
   Release,
@@ -11,9 +11,8 @@ import {
 } from "azure-devops-extension-api/Release";
 import { CommonServiceIds, IProjectPageService, IHostNavigationService, INavigationElement, IPageRoute } from "azure-devops-extension-api";
 import { CoreRestClient, TeamProjectReference } from "azure-devops-extension-api/Core";
-import { store } from "../../../Common/store";
-import { useAppDispatch } from "../../../Common/store/hooks";
-import { incrementAsync } from "../../../Common/store/slices/counterReducer";
+import { RootState } from "../../../Common/store";
+import { useAppSelector } from "../../../Common/store/hooks";
 import { useEffect, useState } from "react";
 
 export interface IGeneralInfoState {
@@ -169,6 +168,7 @@ const getState = async (): Promise<IOverviewTabState> => {
 export function VersionsHubContent(props: any) {
   const [state, setState] = useState<IOverviewTabState>();
   const [generalState, setGeneralState] = useState<IGeneralInfoState>();
+  const pipelines = useAppSelector((state: RootState) => state.versions.pipelines);
 
   useEffect(() => {
     const getDataWrapper = async () => {
@@ -180,11 +180,12 @@ export function VersionsHubContent(props: any) {
 
   useEffect(() => {
     const getDataWrapper = async () => {
+      console.log("getting pipeline information");
       const response = await getState();
       setState(response);
     };
     getDataWrapper();
-  }, []);
+  }, [pipelines]);
 
   return (
     <div className="page-content page-content-top flex-column rhythm-vertical-16">

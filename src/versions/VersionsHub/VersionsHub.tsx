@@ -63,10 +63,6 @@ const VersionsHubMain = (props: any) => {
     panelService.openPanel<ReleaseDefinition | undefined>(SDK.getExtensionContext().id + ".add-pipeline-panel-content", {
       title: "Add pipeline",
       description: "Add a pipeline to the view",
-      // configuration: {
-      //     message: "Show header description?",
-      //     initialValue: !!this.state.headerDescription
-      // },
       onClose: (result) => {
         if (result !== undefined) {
           setPipelines([...new Set([...pipelines, result.name])]); 
@@ -122,7 +118,7 @@ const VersionsHubMain = (props: any) => {
 
         <ul>
           {pipelines.map((pipeline, index) => {
-            return <li>{pipeline}</li>;
+            return <li key={index}>{pipeline}</li>;
           })}
         </ul>
       </Page>
