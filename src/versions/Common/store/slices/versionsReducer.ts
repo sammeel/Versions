@@ -1,37 +1,18 @@
-import { AnyAction, createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import * as SDK from "azure-devops-extension-sdk";
-import { CommonServiceIds, IExtensionDataService } from "azure-devops-extension-api";
-import { DispatchForMiddlewares } from "@reduxjs/toolkit/dist/tsHelpers";
-import { ThunkAction } from "redux-thunk";
-import { RootState } from "..";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ReleaseDefinition } from "azure-devops-extension-api/Release";
+import { getPipelineConfig, setPipelineConfig } from "../../services/dataservice";
 
 interface versionsState {
-  pipelines: string[];
-  addedValue?: string;
+  pipelines: number[];
+  addedValue?: number;
 }
 
-export const addPipelineAsync = createAsyncThunk("versions/addPipeline", async (newPipeline: string, thunkAPI) => {
-  const accessToken = await SDK.getAccessToken();
-  const extensionDataService = await SDK.getService<IExtensionDataService>(CommonServiceIds.ExtensionDataService);
+export const addPipelineAsync = createAsyncThunk("versions/addPipeline", async (pipelineId: number, thunkAPI) => {
+  let pipelines = await getPipelineConfig();
 
-  const manager = await extensionDataService.getExtensionDataManager(SDK.getExtensionContext().id, accessToken);
+  pipelines = [...new Set([...pipelines, pipelineId])];
 
-  let pipelines: string[] = [];
-  try {
-    pipelines = await manager.getValue<string[]>("pipelines");
-  } catch (err) {
-    console.log("error setting value", err);
-  }
-
-  if (!pipelines) {
-    pipelines = [];
-  }
-
-  pipelines.push(newPipeline);
-
-  pipelines = [...new Set([...pipelines, newPipeline])];
-
-  await manager.setValue<string[]>("pipelines", pipelines);
+  await setPipelineConfig(pipelines);
 
   return pipelines;
 });
@@ -48,11 +29,13 @@ export const versionsSlice = createSlice({
     value: 0,
   } as versionsState,
   reducers: {
-    setPipelines: (state, action: PayloadAction<string[]>) => {
+    setPipelines: (state, action: PayloadAction<number[]>) => {
       state.pipelines = action.payload;
     },
-    addPipeline: (state, action: PayloadAction<string>) => {
+    addPipeline: (state, action: PayloadAction<number>) => {
+      console.log("pipelines", ...state.pipelines);
       state.pipelines = [...new Set([...state.pipelines, action.payload])];
+      console.log("pipelines after state", ...state.pipelines);
     },
   },
   extraReducers: (builder) => {
@@ -61,7 +44,7 @@ export const versionsSlice = createSlice({
     });
     builder.addCase(addPipelineAsync.fulfilled, (state, action) => {
       console.log("Pipelines saved");
-    })
+    });
   },
 });
 

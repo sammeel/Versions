@@ -12,63 +12,7 @@ import { Provider } from "react-redux";
 import { store } from "../Common/store";
 import { AddPipelinePanelContent } from "./Components/AddPipelinePanelContent";
 
-const getReleaseDefinitions = async (): Promise<IListBoxItem<ReleaseDefinition>[] | null> => {
-  SDK.init();
-
-  const projectService = await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService);
-  const project = await projectService.getProject();
-
-  if (project) {
-    const releaseClient = getClient(ReleaseRestClient);
-
-    const releaseDefinitions = await releaseClient.getReleaseDefinitions(project.id);
-    return releaseDefinitions.map((def) => {
-      return { id: `${def.id}`, text: def.name, data: def } as IListBoxItem<ReleaseDefinition>;
-    });
-  }
-
-  return null;
-};
-
 export const AddPipelinePanel = () => {
-  const [releaseDefinitions, setReleaseDefinitions] = useState<IListBoxItem<ReleaseDefinition>[]>([]);
-  const [selectedReleaseDefinition, setSelectedReleaseDefinition] = useState<ReleaseDefinition | undefined>(undefined);
-  // const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    const getDataWrapper = async () => {
-      const response = await getReleaseDefinitions();
-      if (response) {
-        setReleaseDefinitions(response);
-      } else {
-        setReleaseDefinitions([]);
-      }
-    };
-
-    getDataWrapper();
-  }, []);
-
-  const onSelect = (event: React.SyntheticEvent<HTMLElement>, item: IListBoxItem<ReleaseDefinition>) => {
-    setSelectedReleaseDefinition(item.data);
-  };
-
-  const okClicked = () => {
-    dismiss(true);
-    // if (selectedReleaseDefinition?.name) {
-    //   dispatch(addPipeline(selectedReleaseDefinition?.name));
-    // }
-  };
-
-  const dismiss = (useValue: boolean) => {
-    const result = useValue ? selectedReleaseDefinition : undefined;
-    const config = SDK.getConfiguration();
-    if (config.dialog) {
-      config.dialog.close(result);
-    } else if (config.panel) {
-      config.panel.close(result);
-    }
-  };
-
   return (
     <Provider store={store}>
       <AddPipelinePanelContent />

@@ -12,11 +12,12 @@ import { VersionsHubContent } from "./components/VersionsHubContent/VersionHubCo
 import { showRootComponent } from "../../Common";
 import { ReleaseDefinition } from "azure-devops-extension-api/Release";
 
-import { store } from "../Common/store";
+import { RootState, store } from "../Common/store";
 
 import { Provider } from "react-redux";
-import { addPipelineAsync, setPipelines as setPipelinesAction } from "../Common/store/slices/versionsReducer";
-import { useAppDispatch } from "../Common/store/hooks";
+import { addPipeline, addPipelineAsync, setPipelines as setPipelinesAction } from "../Common/store/slices/versionsReducer";
+import { useAppDispatch, useAppSelector } from "../Common/store/hooks";
+import { getPipelineConfig } from "../Common/services/dataservice";
 
 interface IVersionsContentState {
   fullScreenMode: boolean;
@@ -65,39 +66,28 @@ const VersionsHubMain = (props: any) => {
       description: "Add a pipeline to the view",
       onClose: (result) => {
         if (result !== undefined) {
-          setPipelines([...new Set([...pipelines, result.name])]); 
           if (result) {
-            dispatch(addPipelineAsync(result.name));
+            dispatch(addPipelineAsync(result.id));
+            dispatch(addPipeline(result.id));
           }
         }
       },
     });
   };
 
-  const getPipelines = async (): Promise<string[]> => {
-    let pipelines: string[] = [];
-    const accessToken = await SDK.getAccessToken();
-    const extensionDataService = await SDK.getService<IExtensionDataService>(CommonServiceIds.ExtensionDataService);
-
-    var manager = await extensionDataService.getExtensionDataManager(SDK.getExtensionContext().id, accessToken);
-
-    try {
-      pipelines = await manager.getValue<string[]>("pipelines");
-    } catch {}
-
-    if (pipelines) return pipelines;
-    return [];
+  const getPipelines = async (): Promise<number[]> => {
+    return await getPipelineConfig();
   };
 
   const useLargeTitle = true;
   const [addedValue, setAddedValue] = useState(null);
-  const [pipelines, setPipelines] = useState<string[]>([]);
+
+  const pipelines = useAppSelector((state: RootState) => state.versions.pipelines);
 
   useEffect(() => {
     const getDataWrapper = async () => {
       const response = await getPipelines();
-      setPipelines(response);
-      dispatch(setPipelinesAction(pipelines));
+      dispatch(setPipelinesAction(response));
     };
     getDataWrapper();
   }, []);

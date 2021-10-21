@@ -53,10 +53,6 @@ export const AddPipelinePanelContent = () => {
 
   const okClicked = () => {
     dismiss(true);
-    if (selectedReleaseDefinition?.name) {
-      dispatch(addPipelineAsync(selectedReleaseDefinition?.name));
-      dispatch(addPipeline(selectedReleaseDefinition?.name));
-    }
   };
 
   const dismiss = (useValue: boolean) => {

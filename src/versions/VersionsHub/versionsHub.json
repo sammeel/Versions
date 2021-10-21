@@ -18,5 +18,5 @@
       }
     }
   ],
-  "scopes": ["vso.release"]
+  "scopes": ["vso.release", "vso.build"]
 }

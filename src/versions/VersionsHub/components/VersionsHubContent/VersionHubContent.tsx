@@ -9,6 +9,7 @@ import {
   ReleaseEnvironment,
   EnvironmentStatus,
 } from "azure-devops-extension-api/Release";
+import { BuildRestClient } from "azure-devops-extension-api/Build";
 import { CommonServiceIds, IProjectPageService, IHostNavigationService, INavigationElement, IPageRoute } from "azure-devops-extension-api";
 import { CoreRestClient, TeamProjectReference } from "azure-devops-extension-api/Core";
 import { RootState } from "../../../Common/store";
@@ -76,11 +77,17 @@ const getState = async (): Promise<IOverviewTabState> => {
   const route = await navService.getPageRoute();
   resultState.route = route;
 
-  const projects = await getClient(CoreRestClient).getProjects();
-  resultState.projects = projects;
+  // const projects = await getClient(CoreRestClient).getProjects();
+  // resultState.projects = projects;
 
   if (project) {
     const expands = ReleaseDefinitionExpands.Environments;
+
+    const pipelinesClient = getClient(BuildRestClient);
+
+    const buildDefinitions = await pipelinesClient.getDefinitions(project.id);
+
+    console.log("buildDefinitions", buildDefinitions);
 
     const releaseClient = getClient(ReleaseRestClient);
 
