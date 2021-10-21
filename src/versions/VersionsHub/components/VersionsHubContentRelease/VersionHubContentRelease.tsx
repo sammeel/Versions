@@ -179,7 +179,7 @@ const getState = async (pipelines: number[]): Promise<IOverviewTabState> => {
   return resultState;
 };
 
-export function VersionsHubContent(props: any) {
+export function VersionsHubContentRelease(props: any) {
   const [state, setState] = useState<IOverviewTabState>();
   const [generalState, setGeneralState] = useState<IGeneralInfoState>();
   const pipelines = useAppSelector((state: RootState) => state.versions.pipelines);
