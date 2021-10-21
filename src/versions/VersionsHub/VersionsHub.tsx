@@ -38,8 +38,6 @@ const VersionsHubMain = (props: any) => {
   SDK.init();
   const dispatch = useAppDispatch();
 
-  // const panelService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
-
   const getCommandBarItems = (): IHeaderCommandBarItem[] => {
     return [
       {
@@ -75,7 +73,7 @@ const VersionsHubMain = (props: any) => {
     });
   };
 
-  const getPipelines = async (): Promise<number[]> => {
+  const getPipelinesConfig = async (): Promise<number[]> => {
     return await getPipelineConfig();
   };
 
@@ -86,7 +84,7 @@ const VersionsHubMain = (props: any) => {
 
   useEffect(() => {
     const getDataWrapper = async () => {
-      const response = await getPipelines();
+      const response = await getPipelinesConfig();
       dispatch(setPipelinesAction(response));
     };
     getDataWrapper();
