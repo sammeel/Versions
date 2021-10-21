@@ -180,7 +180,7 @@ export function VersionsHubContent(props: any) {
 
   useEffect(() => {
     const getDataWrapper = async () => {
-      console.log("getting pipeline information");
+      console.log("getting pipeline information", pipelines);
       const response = await getState();
       setState(response);
     };

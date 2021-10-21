@@ -2,7 +2,7 @@ import "./VersionsHub.scss";
 
 import React, { useEffect, useState } from "react";
 import * as SDK from "azure-devops-extension-sdk";
-import { CommonServiceIds, IExtensionDataManager, IExtensionDataService, IHostPageLayoutService } from "azure-devops-extension-api";
+import { CommonServiceIds, IExtensionDataService, IHostPageLayoutService } from "azure-devops-extension-api";
 
 import { Header, TitleSize } from "azure-devops-ui/Header";
 import { IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
@@ -14,9 +14,9 @@ import { ReleaseDefinition } from "azure-devops-extension-api/Release";
 
 import { store } from "../Common/store";
 
-import { Provider, useDispatch } from "react-redux";
-import { addPipeline, setPipelines as setPipelinesState } from "../Common/store/slices/versionsReducer";
-import { useAppDispatch, useAppSelector } from "../Common/store/hooks";
+import { Provider } from "react-redux";
+import { addPipelineAsync, setPipelines as setPipelinesAction } from "../Common/store/slices/versionsReducer";
+import { useAppDispatch } from "../Common/store/hooks";
 
 interface IVersionsContentState {
   fullScreenMode: boolean;
@@ -67,7 +67,7 @@ const VersionsHubMain = (props: any) => {
         if (result !== undefined) {
           setPipelines([...new Set([...pipelines, result.name])]); 
           if (result) {
-            dispatch(addPipeline(result.name));
+            dispatch(addPipelineAsync(result.name));
           }
         }
       },
@@ -97,7 +97,7 @@ const VersionsHubMain = (props: any) => {
     const getDataWrapper = async () => {
       const response = await getPipelines();
       setPipelines(response);
-      dispatch(setPipelinesState(pipelines));
+      dispatch(setPipelinesAction(pipelines));
     };
     getDataWrapper();
   }, []);

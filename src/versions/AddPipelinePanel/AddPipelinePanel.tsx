@@ -3,16 +3,10 @@ import "./AddPipelinePanel.scss";
 import * as React from "react";
 import * as SDK from "azure-devops-extension-sdk";
 
-import { Dropdown } from "azure-devops-ui/Dropdown";
-import { Button } from "azure-devops-ui/Button";
-import { ButtonGroup } from "azure-devops-ui/ButtonGroup";
-import { Toggle } from "azure-devops-ui/Toggle";
 import { showRootComponent } from "../../Common";
 import { getClient, IProjectPageService, CommonServiceIds } from "azure-devops-extension-api";
-import { ReleaseRestClient, ReleaseDefinition, Release } from "azure-devops-extension-api/Release";
+import { ReleaseRestClient, ReleaseDefinition } from "azure-devops-extension-api/Release";
 import { IListBoxItem } from "azure-devops-ui/ListBox";
-import { useAppDispatch } from "../Common/store/hooks";
-import { addPipeline } from "../Common/store/slices/versionsReducer";
 import { useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import { store } from "../Common/store";

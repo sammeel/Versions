@@ -10,7 +10,7 @@ interface versionsState {
   addedValue?: string;
 }
 
-export const addPipeline = createAsyncThunk("versions/addPipeline", async (newPipeline: string, thunkAPI) => {
+export const addPipelineAsync = createAsyncThunk("versions/addPipeline", async (newPipeline: string, thunkAPI) => {
   const accessToken = await SDK.getAccessToken();
   const extensionDataService = await SDK.getService<IExtensionDataService>(CommonServiceIds.ExtensionDataService);
 
@@ -29,7 +29,7 @@ export const addPipeline = createAsyncThunk("versions/addPipeline", async (newPi
 
   pipelines.push(newPipeline);
 
-  pipelines = [...new Set([...pipelines, newPipeline])]
+  pipelines = [...new Set([...pipelines, newPipeline])];
 
   await manager.setValue<string[]>("pipelines", pipelines);
 
@@ -45,21 +45,27 @@ export const versionsSlice = createSlice({
   name: "versions",
   initialState: {
     pipelines: [],
-    value: 0
+    value: 0,
   } as versionsState,
   reducers: {
     setPipelines: (state, action: PayloadAction<string[]>) => {
       state.pipelines = action.payload;
-    }
+    },
+    addPipeline: (state, action: PayloadAction<string>) => {
+      state.pipelines = [...new Set([...state.pipelines, action.payload])];
+    },
   },
   extraReducers: (builder) => {
-    builder.addCase(addPipeline.fulfilled, (state, action) => {
-      state.pipelines = action.payload;
+    builder.addCase(addPipelineAsync.rejected, (state, action) => {
+      console.error("Failed to save pipelines information", action.error);
     });
+    builder.addCase(addPipelineAsync.fulfilled, (state, action) => {
+      console.log("Pipelines saved");
+    })
   },
 });
 
-export const { setPipelines } = versionsSlice.actions;
+export const { setPipelines, addPipeline } = versionsSlice.actions;
 
 export default versionsSlice.reducer;
 

@@ -8,7 +8,7 @@ import { getClient, IProjectPageService, CommonServiceIds } from "azure-devops-e
 import { ReleaseRestClient, ReleaseDefinition, Release } from "azure-devops-extension-api/Release";
 import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { useEffect, useState } from "react";
-import { addPipeline } from "../../Common/store/slices/versionsReducer";
+import { addPipeline, addPipelineAsync } from "../../Common/store/slices/versionsReducer";
 import { useAppDispatch } from "../../Common/store/hooks";
 
 const getReleaseDefinitions = async (): Promise<IListBoxItem<ReleaseDefinition>[] | null> => {
@@ -54,6 +54,7 @@ export const AddPipelinePanelContent = () => {
   const okClicked = () => {
     dismiss(true);
     if (selectedReleaseDefinition?.name) {
+      dispatch(addPipelineAsync(selectedReleaseDefinition?.name));
       dispatch(addPipeline(selectedReleaseDefinition?.name));
     }
   };
